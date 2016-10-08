@@ -1,0 +1,143 @@
+#!/usr/bin/env python
+import argparse
+import datetime
+import locale
+import os
+from calendar import monthrange
+from string import Template
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import weasyprint
+
+from models import Fact
+import config
+
+
+locale.setlocale(locale.LC_ALL, config.LOCALE)
+
+
+class HamsterDBReader:
+    """Provide ORM access to facts in a hamster-indicator database."""
+
+    def __init__(self, db):
+        self.db = db
+        engine = create_engine(self.db)
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.session.close()
+
+    def get_facts(self, start, end, tag=None):
+        facts = self.session.query(Fact).filter(Fact.start_time >= start,
+                                                Fact.end_time <= end)
+        if tag:
+            facts = facts.filter(Fact.tags.any(name=tag))
+        return facts
+
+
+class HamsterBill:
+
+    def __init__(self, client, month, year):
+        assert client in config.CUSTOMER.keys(), \
+            "Unknown customer '{}', please add it to config.py first.".format(client)
+        self.client = client
+        self.month = month
+        self.year = year
+        self.billing_period = self.determine_billing_period()
+        self.config = config.CUSTOMER.get("__common__").copy()
+        self.config.update(config.CUSTOMER.get(client))
+
+    def determine_billing_period(self):
+        start_time = datetime.datetime(self.year, self.month, 1, 0, 0, 0)
+        _, last = monthrange(self.year, self.month)
+        end_time = start_time + datetime.timedelta(days=last, hours=4)
+        return start_time, end_time
+
+    def to_html(self):
+        with open(config.BILL_TEMPLATE, "r") as template:
+            html = template.read()
+        html = Template(html)
+
+        dynamics = self.get_dynamic_values()
+        self.config.update(dynamics)
+
+        bill = html.substitute(**self.config)
+        return bill
+
+    def get_dynamic_values(self):
+        d = {}
+
+        with HamsterDBReader(config.HAMSTER_DB) as db:
+            facts = db.get_facts(*self.billing_period, self.client)
+        d["fact_rows"] = self.tabelarize_facts(facts)
+        total_hours = round(self.total_hours, 1)
+
+        net_total = round(total_hours * self.config["hourly_rate"], 2)
+        tax = round(net_total * (self.config["tax_rate"]/100), 2)
+        today = datetime.datetime.today()
+        self.invoice_number = self.get_invoice_number(self.config["name"])
+
+        d["invoice_number"] = self.invoice_number
+        d["total_hours"] = locale.str(total_hours)
+        d["net_total"] = locale.currency(net_total, grouping=True)
+        d["tax"] = locale.currency(tax, grouping=True)
+        d["grand_total"] = locale.currency(net_total + tax, grouping=True)
+        d["date"] = today.strftime("%d.%m.%Y")
+        d["due_date"] = (today + datetime.timedelta(days=config.TIMEDELTA_DUE_DATE)).strftime("%d.%m.%Y")
+        d["hourly_rate"] = locale.currency(self.config["hourly_rate"])
+        d["billing_period"] = self.billing_period[0].strftime("%B %Y")
+
+        return d
+
+    def tabelarize_facts(self, facts):
+        rows = []
+        tmpl = Template(config.ACTIVITY_ROW_TEMPLATE)
+        total_duration = datetime.timedelta()
+        for f in facts:
+            d = {
+                "description": ", ".join(t for t in (f.activity.name, f.description) if t),
+                "start": f.start_time.strftime("%d.%m %H:%M"),
+                "end": f.end_time.strftime("%d.%m %H:%M"),
+                "duration": f.duration
+            }
+            print("{} - {}  {}".format(f.start_time, f.end_time, f.activity.name))
+
+            rows.append(tmpl.substitute(d))
+            total_duration += f.duration
+
+        self.total_hours = total_duration.total_seconds() / 3600.0
+        print("Total: {:.2f} hours in {}/{}".format(self.total_hours,
+                                                    self.month, self.year))
+        return "\n".join(rows)
+
+    def get_invoice_number(self, name):
+        return "{}{}{:02}".format(name[0].upper(), self.year, self.month)
+
+    def to_pdf(self):
+        html = self.to_html()
+        base_url = os.path.dirname(config.BILL_TEMPLATE)
+        filename = os.path.join(self.config["output_folder"],
+                                "{}.pdf".format(self.invoice_number))
+        weasyprint.HTML(string=html, base_url=base_url).write_pdf(filename)
+        print("Bill saved to: {}".format(filename))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('yearmonth', nargs="?")
+    parser.add_argument('client', nargs="?")  # = hamster tag
+    args = parser.parse_args()
+
+    client = args.client
+    if args.yearmonth:
+        year, month = (int(i) for i in args.yearmonth.split("-"))
+    else:
+        today = datetime.date.today()
+        year, month = today.year, today.month
+
+    HamsterBill(client, month, year).to_pdf()

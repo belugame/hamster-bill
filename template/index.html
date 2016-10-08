@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Invoice</title>
+    <link rel="stylesheet" href="style.css" media="all" />
+  </head>
+  <body>
+    <header class="clearfix">
+      <div id="logo">
+        <img src="logo.png">
+      </div>
+      <h1>INVOICE</h1>
+      <div id="company" class="clearfix">
+          $date</br></br>
+          John Doe</br>
+          Web Development</br>
+          43 Evergreen Terrance</br>
+          45325 Springfield</br>
+          Email: john@doe.com</br>
+          Mobile: +62 46896554567</br>
+      </div>
+      <div id="project">
+          <br/></br>
+          <div><span>CLIENT</span> $name</div>
+          <div><span>ADDRESS</span> $address_line1</div>
+          <div><span> </span> $address_line2</div>
+          <div><span> </span> $address_line3</div>
+          <div><span>INVOICE NUMBER</span> $invoice_number</div>
+          <div><span>BILLING PERIOD</span> $billing_period</div>
+          <div><span>DUE DATE</span> $due_date</div>
+      </div>
+    </header>
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th class="service">SERVICE</th>
+            <th class="desc">DESCRIPTION</th>
+            <th>RATE</th>
+            <th>HOURS</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="service">$description_short</td>
+            <td class="desc">$description_long</td>
+            <td class="unit">$hourly_rate</td>
+            <td class="qty">$total_hours</td>
+            <td class="total">$net_total</td>
+          </tr>
+          <tr>
+            <td colspan="4">NET TOTAL</td>
+            <td class="total">$net_total</td>
+          </tr>
+          <tr>
+            <td colspan="4">TAX $tax_rate%</td>
+            <td class="total">$tax</td>
+          </tr>
+          <tr>
+            <td colspan="4" class="grand total">GRAND TOTAL</td>
+            <td class="grand total">$grand_total</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="notices">
+        <div class="notice">
+            <p>$notice</p>
+        </div>
+      </div>
+    </main>
+    <p style="page-break-after:always;"></p>
+    <table>
+        <tr>
+            <th>START</th><th>END</th><th>DURATION</th><th>DESCRIPTION</th>
+        </tr>
+            $fact_rows
+    </table>
+  </body>
+</html>

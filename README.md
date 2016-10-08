@@ -11,7 +11,7 @@ A small Python 3 wrapper for creating monthly bills from your [hamster-indicator
 - renders activity table with all log records on following pages
 - formats numbers as your locale
 
-Tested under Ubuntu 16.04 with WeasyPrint 0.31 and SQLAlchemy 1.1.0
+Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1+037dd2e-0ubuntu, WeasyPrint 0.31 and SQLAlchemy 1.1.0
 
 ## Installation: 
 

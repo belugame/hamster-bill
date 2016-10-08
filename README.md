@@ -24,7 +24,7 @@ Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1
 
 - edit `config.py` to adjust at least your database path, output folder and one customer definition.
 
-- for a generating the September 2016 bill for all records tagged "CompanyA" you would call it like:
+- for generating the September 2016 bill for all records tagged "CompanyA" you would call it like:
 ```
 ./bill 2016-9 CompanyA
 

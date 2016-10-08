@@ -2,6 +2,12 @@
 
 A small Python 3 wrapper for creating monthly bills from your [hamster-indicator](https://apps.ubuntu.com/cat/applications/precise/hamster-indicator/) time tracking database in HTML/PDF. Allows you to define your own template and per-customer variables (like hourly rate). 
 
+[See sample pdf](/sample/C201609.pdf?raw=true "Sample bill")
+
+![sample records](/sample/screenshot.jpg?raw=true)
+![sample pdf](/sample/bill.jpg?raw=true)
+
+
 ## Features
 
 - collects all time records for a given month with the same tag (=company name)

@@ -4,7 +4,11 @@ A small Python 3 wrapper for creating monthly bills from your [hamster-indicator
 
 [See sample pdf](/sample/C201609.pdf?raw=true "Sample bill")
 
+Sample records:
+
 ![sample records](/sample/screenshot.jpg?raw=true)
+
+Sample generated bill:
 ![sample pdf](/sample/bill.jpg?raw=true)
 
 
@@ -28,8 +32,8 @@ Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1
 
 ## Usage:
 
+- use hamster-indicator as usual, chose a common tag for all records you want to bill together.
 - edit `config.py` to adjust at least your database path, output folder and one customer definition.
-
 - for generating the September 2016 bill for all records tagged "CompanyA" you would call it like:
 ```
 ./bill 2016-9 CompanyA

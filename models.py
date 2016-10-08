@@ -1,5 +1,4 @@
 # coding: utf-8
-# sqlacodegen sqlite:////home/martin/safe/local/hamster.db > models.py
 from sqlalchemy import Boolean, Column, DateTime, Integer, LargeBinary, Table, Text, text, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import NullType

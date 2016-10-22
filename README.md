@@ -28,6 +28,7 @@ Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1
     git clone https://github.com/belugame/hamster-bill.git
     pip install WeasyPrint sqlalchemy
     cd hamster-bill
+    cp config.py.sample config.py
 
 
 ## Usage:

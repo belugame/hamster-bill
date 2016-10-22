@@ -37,10 +37,11 @@ class HamsterDBReader:
                                                 Fact.end_time <= end)
         if tag:
             facts = facts.filter(Fact.tags.any(name=tag))
-        return facts
+        return facts.order_by(Fact.start_time)
 
 
 class HamsterBill:
+    hours_after_midnite_to_include = 4
 
     def __init__(self, client, month, year):
         assert client in config.CUSTOMER.keys(), \
@@ -53,9 +54,12 @@ class HamsterBill:
         self.config.update(config.CUSTOMER.get(client))
 
     def determine_billing_period(self):
+        """Include activities of following day until 4am"""
         start_time = datetime.datetime(self.year, self.month, 1, 0, 0, 0)
         _, last = monthrange(self.year, self.month)
-        end_time = start_time + datetime.timedelta(days=last, hours=4)
+        end_time = start_time + datetime.timedelta(days=last, hours=self.hours_after_midnite_to_include)
+        now = datetime.datetime.now()
+        end_time = end_time if now > end_time else now
         return start_time, end_time
 
     def to_html(self):
@@ -90,7 +94,12 @@ class HamsterBill:
         d["date"] = today.strftime("%d.%m.%Y")
         d["due_date"] = (today + datetime.timedelta(days=config.TIMEDELTA_DUE_DATE)).strftime("%d.%m.%Y")
         d["hourly_rate"] = locale.currency(self.config["hourly_rate"])
-        d["billing_period"] = self.billing_period[0].strftime("%B %Y")
+        # For the paper bill we want to print last day of month rather than 1st
+        # 4am of following:
+        start, end = self.billing_period
+        end -= datetime.timedelta(hours=self.hours_after_midnite_to_include, seconds=1)
+        d["billing_period"] = "{} - {}".format(start.strftime("%d.%m"),
+                                               end.strftime("%d.%m.%Y"))
 
         return d
 

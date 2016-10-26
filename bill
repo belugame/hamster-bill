@@ -3,45 +3,21 @@ import argparse
 import datetime
 import locale
 import os
-from calendar import monthrange
 from string import Template
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import weasyprint
 
-from models import Fact
+from reader import HamsterDBReader
+from report import HamsterReport
 import config
 
 
 locale.setlocale(locale.LC_ALL, config.LOCALE)
 
 
-class HamsterDBReader:
-    """Provide ORM access to facts in a hamster-indicator database."""
-
-    def __init__(self, db):
-        self.db = db
-        engine = create_engine(self.db)
-        Session = sessionmaker(bind=engine)
-        self.session = Session()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.session.close()
-
-    def get_facts(self, start, end, tag=None):
-        facts = self.session.query(Fact).filter(Fact.start_time >= start,
-                                                Fact.end_time <= end)
-        if tag:
-            facts = facts.filter(Fact.tags.any(name=tag))
-        return facts.order_by(Fact.start_time)
-
-
-class HamsterBill:
-    hours_after_midnite_to_include = 4
+class HamsterBill(HamsterReport):
 
     def __init__(self, client, month, year):
         assert client in config.CUSTOMER.keys(), \
@@ -52,15 +28,6 @@ class HamsterBill:
         self.billing_period = self.determine_billing_period()
         self.config = config.CUSTOMER.get("__common__").copy()
         self.config.update(config.CUSTOMER.get(client))
-
-    def determine_billing_period(self):
-        """Include activities of following day until 4am"""
-        start_time = datetime.datetime(self.year, self.month, 1, 0, 0, 0)
-        _, last = monthrange(self.year, self.month)
-        end_time = start_time + datetime.timedelta(days=last, hours=self.hours_after_midnite_to_include)
-        now = datetime.datetime.now()
-        end_time = end_time if now > end_time else now
-        return start_time, end_time
 
     def to_html(self):
         with open(config.BILL_TEMPLATE, "r") as template:
@@ -139,7 +106,7 @@ class HamsterBill:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('yearmonth', nargs="?")
-    parser.add_argument('client', nargs="?")  # = hamster tag
+    parser.add_argument('client')  # = hamster tag
     args = parser.parse_args()
 
     client = args.client

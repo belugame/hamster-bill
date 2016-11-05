@@ -139,7 +139,7 @@ footer {
 
 .barchart{
     white-space: nowrap;
-    width: 100%;
+    width: 80%;
 }
 
 dd:nth-of-type(odd) {

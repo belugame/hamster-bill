@@ -100,7 +100,8 @@ class HamsterBill(HamsterReport):
         rows = []
         for name, duration in activities:
             width = round(duration.seconds/max_duration*100)
-            d = {"width": width, "name": name}
+            label = "{:6.2f} h {}".format(duration.seconds/3600, name)
+            d = {"width": width, "label": label}
             rows.append(tmpl.substitute(d))
         return "\n".join(rows)
 

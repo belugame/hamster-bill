@@ -45,7 +45,8 @@ class HamsterBill(HamsterReport):
 
         with HamsterDBReader(config.HAMSTER_DB) as db:
             facts = db.get_facts(*self.billing_period, self.client)
-        d["fact_rows"] = self.tabelarize_facts(facts)
+        d["fact_rows"] = self.get_fact_table(facts)
+        d["bar_chart_rows"] = self.get_duration_by_activity_bar_chart(facts)
         total_hours = round(self.total_hours, 1)
 
         net_total = round(total_hours * self.config["hourly_rate"], 2)
@@ -70,7 +71,7 @@ class HamsterBill(HamsterReport):
 
         return d
 
-    def tabelarize_facts(self, facts):
+    def get_fact_table(self, facts):
         rows = []
         tmpl = Template(config.ACTIVITY_ROW_TEMPLATE)
         total_duration = datetime.timedelta()
@@ -89,6 +90,18 @@ class HamsterBill(HamsterReport):
         self.total_hours = total_duration.total_seconds() / 3600.0
         print("Total: {:.2f} hours in {}/{}".format(self.total_hours,
                                                     self.month, self.year))
+        return "\n".join(rows)
+
+    def get_duration_by_activity_bar_chart(self, facts):
+        activities = self.get_durations_by_activity(facts)
+        max_duration = activities[0][1].seconds
+
+        tmpl = Template(config.BAR_CHART_ROW_TEMPLATE)
+        rows = []
+        for name, duration in activities:
+            width = round(duration.seconds/max_duration*100)
+            d = {"width": width, "name": name}
+            rows.append(tmpl.substitute(d))
         return "\n".join(rows)
 
     def get_invoice_number(self, name):

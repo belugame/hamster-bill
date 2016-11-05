@@ -2,7 +2,9 @@
 import argparse
 import datetime
 import os
+import operator
 from calendar import monthrange
+from collections import defaultdict
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -23,10 +25,10 @@ class HamsterReport:
         self.billing_period = self.determine_billing_period()
 
         with HamsterDBReader(config.HAMSTER_DB) as db:
-            facts = db.get_facts(*self.billing_period, self.client)
+            self.facts = db.get_facts(*self.billing_period, self.client)
 
         total_duration = datetime.timedelta()
-        for f in facts:
+        for f in self.facts:
             d = {
                 "description": ", ".join(t for t in (f.activity.name, f.description) if t),
                 "start": f.start_time.strftime("%d.%m %H:%M"),
@@ -49,6 +51,17 @@ class HamsterReport:
         now = datetime.datetime.now()
         end_time = end_time if now > end_time else now
         return start_time, end_time
+
+    def get_durations_by_activity(self, facts):
+        activities = defaultdict(datetime.timedelta)
+        for f in facts:
+            activities[f.activity.name] += f.duration
+        activities = sorted(activities.items(), key=operator.itemgetter(1))
+        activities.reverse()
+        for name, duration in activities:
+            print ("{:60}: {:6.2f} h".format(name, duration.seconds/3600))
+
+        return activities
 
 
 if __name__ == "__main__":

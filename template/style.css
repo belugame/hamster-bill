@@ -136,3 +136,15 @@ footer {
   padding: 8px 0;
   text-align: center;
 }
+
+.barchart{
+    white-space: nowrap;
+    width: 100%;
+}
+
+dd:nth-of-type(odd) {
+    background: #63deb0;
+}
+dd:nth-of-type(even) {
+    background: #95edcc;
+}

@@ -29,6 +29,7 @@ class HamsterBill(HamsterReport):
         self.billing_period = self.determine_billing_period()
         self.config = config.CUSTOMER.get("__common__").copy()
         self.config.update(config.CUSTOMER.get(client))
+        self.config["address_header"] = config.HEADER
 
     def to_html(self):
         with open(config.BILL_TEMPLATE, "r") as template:
@@ -103,13 +104,13 @@ class HamsterBill(HamsterReport):
 
     def get_duration_by_activity_bar_chart(self, facts):
         activities = self.get_durations_by_activity(facts)
-        max_duration = activities[0][1].seconds
+        max_duration = activities[0][1].total_seconds()
 
         tmpl = Template(config.BAR_CHART_ROW_TEMPLATE)
         rows = []
         for name, duration in activities:
-            width = round(duration.seconds/max_duration*100)
-            label = "{:7.2f} h {}".format(duration.seconds/3600, name)
+            width = round(duration.total_seconds()/max_duration*100, 2)
+            label = "{:7.2f} h {}".format(duration.total_seconds()/3600, name)
             d = {"width": width, "label": label}
             rows.append(tmpl.substitute(d))
         return "\n".join(rows)

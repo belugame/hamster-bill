@@ -140,6 +140,8 @@ footer {
 .barchart{
     white-space: nowrap;
     width: 80%;
+    border: 1px solid #C1CED9;
+    padding: 10px;
 }
 
 dd{

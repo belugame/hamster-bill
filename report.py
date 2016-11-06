@@ -56,11 +56,12 @@ class HamsterReport:
         activities = defaultdict(datetime.timedelta)
         for f in facts:
             activities[f.activity.name] += f.duration
+        total = sum([a.total_seconds() for a in activities.values()])/3600
         activities = sorted(activities.items(), key=operator.itemgetter(1))
         activities.reverse()
         for name, duration in activities:
-            print ("{:60}: {:6.2f} h".format(name, duration.seconds/3600))
-
+            print("{:60} {:6.2f} h".format(name, duration.total_seconds()/3600))
+        print("Total: {:.2f} h".format(total))
         return activities
 
 

@@ -3,6 +3,7 @@ import argparse
 import datetime
 import locale
 import os
+import tempfile
 from string import Template
 
 from sqlalchemy import create_engine
@@ -38,7 +39,15 @@ class HamsterBill(HamsterReport):
         self.config.update(dynamics)
 
         bill = html.substitute(**self.config)
+        if config.SAVE_HTML:
+            self.save_to_tmp(bill)
         return bill
+
+    def save_to_tmp(self, content):
+        tmp = tempfile.NamedTemporaryFile(delete=False)
+        tmp.write(str.encode(content))
+        tmp.close()
+        print("HTML saved to {}".format(tmp.name))
 
     def get_dynamic_values(self):
         d = {}
@@ -100,7 +109,7 @@ class HamsterBill(HamsterReport):
         rows = []
         for name, duration in activities:
             width = round(duration.seconds/max_duration*100)
-            label = "{:6.2f} h {}".format(duration.seconds/3600, name)
+            label = "{:7.2f} h {}".format(duration.seconds/3600, name)
             d = {"width": width, "label": label}
             rows.append(tmpl.substitute(d))
         return "\n".join(rows)

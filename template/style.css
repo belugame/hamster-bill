@@ -142,6 +142,10 @@ footer {
     width: 80%;
 }
 
+dd{
+    margin: 0;
+}
+
 dd:nth-of-type(odd) {
     background: #63deb0;
 }

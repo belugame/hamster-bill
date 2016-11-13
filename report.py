@@ -27,11 +27,6 @@ class HamsterReport:
         with HamsterDBReader(config.HAMSTER_DB) as db:
             self.facts = db.get_facts(*self.billing_period, self.client)
 
-        total_duration = datetime.timedelta()
-        _, self.total_hours = self.get_durations_by_day(self.facts)
-        print("---------------------")
-        print("Total:       {:.2f} h in {}/{}".format(self.total_hours,
-                                                    self.month, self.year))
 
     def determine_billing_period(self):
         """Include activities of following day until 4am"""
@@ -60,9 +55,25 @@ class HamsterReport:
             days[f.start_time.date()] += f.duration
         total = sum([d.total_seconds() for d in days.values()])/3600
         days = sorted(days.items(), key=operator.itemgetter(0))
-        for day, duration in days:
-            print("{}  {:6.2f} h".format(day, duration.total_seconds()/3600))
         return days, total
+
+    def make_daily_report(self):
+        total_duration = datetime.timedelta()
+        days, total_hours = self.get_durations_by_day(self.facts)
+        self.make_bar_chart(days)
+
+    def make_bar_chart(self, days):
+        from ascii_graph import Pyasciigraph
+        graph = Pyasciigraph(float_format='{0:,.2f}')
+
+        items = [(str(date), timedelta.total_seconds()/3600) for date, timedelta in days]
+        for line in graph.graph('{}/{}'.format(self.month, self.year), items):
+            print(line)
+        # for day, duration in days:
+            # print("{}  {:6.2f} h".format(day, duration.total_seconds()/3600))
+        # print("---------------------")
+        # print("Total:       {:.2f} h in {}/{}".format(total_hours,
+                                                      # self.month, self.year))
 
 
 if __name__ == "__main__":
@@ -78,4 +89,4 @@ if __name__ == "__main__":
         today = datetime.date.today()
         year, month = today.year, today.month
 
-    HamsterReport(client, month, year)
+    HamsterReport(client, month, year).make_daily_report()

@@ -23,12 +23,12 @@ Sample generated bill:
 - formats numbers as your locale
 - generate bar charts: hours worked per month/day
 
-Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1+037dd2e-0ubuntu, WeasyPrint 0.31 and SQLAlchemy 1.1.0
+Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1+037dd2e-0ubuntu, WeasyPrint 0.31, ascii-graph==1.2.0 and SQLAlchemy 1.1.0
 
 ## Installation:
 
     git clone https://github.com/belugame/hamster-bill.git
-    pip install WeasyPrint sqlalchemy
+    pip install WeasyPrint sqlalchemy ascii-graph
     cd hamster-bill
     cp config.py.sample config.py
 

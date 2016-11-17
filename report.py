@@ -18,9 +18,10 @@ from reader import HamsterDBReader
 class HamsterReport:
     hours_after_midnite_to_include = 4
 
-    def __init__(self, client, year, month=None):
-        assert client in config.CUSTOMER.keys(), \
-            "Unknown customer '{}', please add it to config.py first.".format(client)
+    def __init__(self, year, month=None, client=None):
+        if client:
+            assert client in config.CUSTOMER.keys(), \
+                "Unknown customer '{}', please add it to config.py first.".format(client)
         self.client = client
         self.month = month
         self.year = year
@@ -91,7 +92,7 @@ class HamsterReport:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('period', nargs="?")
-    parser.add_argument('client')  # = hamster tag
+    parser.add_argument('client', nargs="?")  # = hamster tag
     args = parser.parse_args()
 
     client = args.client
@@ -106,6 +107,6 @@ if __name__ == "__main__":
         year, month = today.year, today.month
 
     if month:
-        HamsterReport(client, year, month).make_daily_report()
+        HamsterReport(year, month, client).make_daily_report()
     else:
-        HamsterReport(client, year).make_monthly_report()
+        HamsterReport(year, client=client).make_monthly_report()

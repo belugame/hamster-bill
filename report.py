@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 import argparse
 import datetime
-import os
 import operator
 from calendar import monthrange
 from collections import defaultdict
 from time import strptime
 
 from ascii_graph import Pyasciigraph
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 import config
 from reader import HamsterDBReader
@@ -84,7 +81,7 @@ class HamsterReport:
 
     def make_bar_chart(self, data, title):
         items = [(str(date), timedelta.total_seconds()/3600) for date, timedelta in data]
-        graph = Pyasciigraph(float_format='{0:,.2f}', graphsymbol='|')
+        graph = Pyasciigraph(float_format='{0:,.2f}', graphsymbol='֍')
         for line in graph.graph(title, items):
             print(line)
 

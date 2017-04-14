@@ -15,37 +15,43 @@ class HamsterProgress:
         self.year = year
         self.report = HamsterReport(year, month, client)
 
-    def get_workdays(self):
+    def get_days(self):
         all_days = [day for day in Calendar().itermonthdates(self.year, self.month)
                     if day.month == self.month]
-        return [x for x in all_days if not any([x in config.HOLIDAYS,
-                                                x.weekday() in [5, 6]])]
+        return all_days, [x for x in all_days if not any([x in config.HOLIDAYS,
+                                                          x.weekday() in [5, 6]])]
 
     def __repr__(self):
-        workdays = self.get_workdays()
+        days, workdays = self.get_days()
         today = date.today()
         total_workdays = len(workdays)
-        left_workdays = len(workdays[workdays.index(today):])
-        percent_days = left_workdays / total_workdays
+        left_days = len(days[days.index(today):])
+        left_workdays = len(workdays[workdays.index(next(w for w in workdays if w >= today)):])
+        percent_days = 1 - (left_days / len(days))
+        percent_workdays = 1 - (left_workdays / total_workdays)
         current_hours = self.report.get_durations_by_day(self.report.facts)[1]
         needed_hours = len(workdays) * config.WORKDAY_HOURS
         percent_fulfillment = current_hours / needed_hours
 
         data = dict(
             month=today.strftime("%B %Y"),
+            total_days=len(days),
             total_workdays=total_workdays,
+            left_days=left_days,
             left_workdays=left_workdays,
             current_hours=current_hours,
             percent_days=percent_days,
+            percent_workdays=percent_workdays,
             needed_hours=needed_hours,
             percent_fulfillment=percent_fulfillment
         )
 
         return """
         {month}:
-        ------------------------
-        {left_workdays} out of {total_workdays} workdays left ({percent_days:.1%} left).
-        {current_hours:.0f} out of {needed_hours} needed hours worked ({percent_fulfillment:.1%} fulfilled).
+        -----------------------------------------------------
+        {left_days:3} out of {total_days:3} days left           ({percent_days:.1%} passed)
+        {left_workdays:3} out of {total_workdays:3} workdays left       ({percent_workdays:.1%} passed)
+        {current_hours:3.0f} out of {needed_hours:3} needed hours worked ({percent_fulfillment:.1%} fulfilled)
         """.format(**data)
 
 

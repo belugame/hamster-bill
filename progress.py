@@ -32,6 +32,7 @@ class HamsterProgress:
         current_hours = self.report.get_durations_by_day(self.report.facts)[1]
         needed_hours = len(workdays) * config.WORKDAY_HOURS
         percent_fulfillment = current_hours / needed_hours
+        delta_hours = (needed_hours / len(days) * today.day) - current_hours
 
         data = dict(
             month=today.strftime("%B %Y"),
@@ -43,7 +44,9 @@ class HamsterProgress:
             percent_days=percent_days,
             percent_workdays=percent_workdays,
             needed_hours=needed_hours,
-            percent_fulfillment=percent_fulfillment
+            percent_fulfillment=percent_fulfillment,
+            delta_hours=delta_hours,
+            behind_ahead="behind" if delta_hours > 0 else "ahead of"
         )
 
         return """
@@ -52,6 +55,7 @@ class HamsterProgress:
         {left_days:3} out of {total_days:3} days left           ({percent_days:.1%} passed)
         {left_workdays:3} out of {total_workdays:3} workdays left       ({percent_workdays:.1%} passed)
         {current_hours:3.0f} out of {needed_hours:3} needed hours worked ({percent_fulfillment:.1%} fulfilled)
+        {delta_hours:3.0f} hours {behind_ahead} fulfillment.
         """.format(**data)
 
 

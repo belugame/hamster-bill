@@ -11,6 +11,8 @@ Sample records:
 Sample generated bill:
 ![sample pdf](/sample/bill.jpg?raw=true)
 
+Sample bar charts and progress info:
+![sample pdf](/sample/chart.jpg?raw=true)
 
 ## Features
 
@@ -18,17 +20,28 @@ Sample generated bill:
 - calculates total hours, tax amount, grand total
 - renders first page with your logo, address, customer address etc.
 - auto-generates invoice number, due date
-- creates bar chart with time spent per activity
+- creates bar chart with time spent per activity, time worked per month and
+year
+- info about if you are behind/ahead of the time you need to work for a client
 - renders activity table with all log records on following pages
 - formats numbers as your locale
 - generate bar charts: hours worked per month/day
 
-Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1+037dd2e-0ubuntu, WeasyPrint 0.31, ascii-graph==1.2.0 and SQLAlchemy 1.1.0
+Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1+037dd2e-0ubuntu
+
+
+## Requirements (PIP):
+
+- WeasyPrint >= 0.31
+- ascii-graph >= 1.2.0
+- SQLAlchemy >= 1.1.0
+- holidays >= 0.8.1
+
 
 ## Installation:
 
     git clone https://github.com/belugame/hamster-bill.git
-    pip install WeasyPrint sqlalchemy ascii-graph
+    pip install WeasyPrint sqlalchemy ascii-graph holidays
     cd hamster-bill
     cp config.py.sample config.py
 
@@ -46,6 +59,7 @@ Tested under Ubuntu 16.04 with hamster-applet v. 2.91 / hamster-indicator v. 0.1
 2016-09-07 08:00:00 - 2016-09-07 08:30:00  email template
 Total: 1.53 hours in 9/2016
 Bill saved to: /home/foo/C201609.pdf
+<<<<<<< 0178c8fa1f5b6d687ad46122a37dd0dc8347a373
 
 # Daily hours worked for a customer
 
@@ -73,17 +87,28 @@ python3 report.py 2016 CompanyA
 
 Total hours in 2016: 761.06
 ###############################################################################
-|||||||||||||||||||||||||||||||||                              59.66  January  
-|||||||||||||||||||||||||||||||                                56.27  February 
-||||||||||||||||||||||||||||||||                               56.50  March    
-||||||||||||||||||||||||||||||||||                             61.54  April    
-||||||||||||||||||||||||||                                     46.43  May      
-|||||||||||||||||||||||||||||||||||||||||||||||||              86.77  June     
-||||||||||||||||||||||||||||||||||||||||||||||||               84.99  July     
-|||||||||||||||||||||||                                        41.96  August   
+|||||||||||||||||||||||||||||||||                              59.66  January
+|||||||||||||||||||||||||||||||                                56.27  February
+||||||||||||||||||||||||||||||||                               56.50  March
+||||||||||||||||||||||||||||||||||                             61.54  April
+||||||||||||||||||||||||||                                     46.43  May
+|||||||||||||||||||||||||||||||||||||||||||||||||              86.77  June
+||||||||||||||||||||||||||||||||||||||||||||||||               84.99  July
+|||||||||||||||||||||||                                        41.96  August
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||   105.91  September
-||||||||||||||||||||||||||||||||||||||||||||||||||||||         97.05  October  
+||||||||||||||||||||||||||||||||||||||||||||||||||||||         97.05  October
 ||||||||||||||||||||||||||||||||||||                           64.00  November
+
+# Progress in current month about needed and delivered hours:
+
+python3 progress.py clientA
+
+April 2017:
+-----------------------------------------------------
+  13 out of  30 days left           (56.7% passed)
+   9 out of  18 workdays left       (50.0% passed)
+48.2 out of 108 needed hours worked (44.7% fulfilled)
+13.0 hours behind schedule.
 
 ```
 

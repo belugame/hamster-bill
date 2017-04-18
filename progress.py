@@ -7,6 +7,23 @@ from report import HamsterReport
 import config
 
 
+class Utils:
+
+    @classmethod
+    def get_days(cls, year, month):
+        """Return tuple with list of all days, and all workdays of the month."""
+        all_days = [day for day in Calendar().itermonthdates(year, month)
+                    if day.month == month]
+        return all_days, [x for x in all_days if not any([x in config.HOLIDAYS,
+                                                          x.weekday() in [5, 6]])]
+
+    @classmethod
+    def calculate_needed_hours(cls, year, month):
+        """Return amount of needed work hours of the month."""
+        _, workdays = Utils.get_days(year, month)
+        return len(workdays) * config.WORKDAY_HOURS
+
+
 class HamsterProgress:
 
     def __init__(self, year, month, client):
@@ -15,14 +32,8 @@ class HamsterProgress:
         self.year = year
         self.report = HamsterReport(year, month, client)
 
-    def get_days(self):
-        all_days = [day for day in Calendar().itermonthdates(self.year, self.month)
-                    if day.month == self.month]
-        return all_days, [x for x in all_days if not any([x in config.HOLIDAYS,
-                                                          x.weekday() in [5, 6]])]
-
     def __repr__(self):
-        days, workdays = self.get_days()
+        days, workdays = Utils.get_days(self.year, self.month)
         today = date.today()
         total_workdays = len(workdays)
         left_days = len(days[days.index(today):])
@@ -30,7 +41,7 @@ class HamsterProgress:
         percent_days = 1 - (left_days / len(days))
         percent_workdays = 1 - (left_workdays / total_workdays)
         current_hours = self.report.get_durations_by_day(self.report.facts)[1]
-        needed_hours = len(workdays) * config.WORKDAY_HOURS
+        needed_hours = Utils.calculate_needed_hours(self.year, self.month)
         percent_fulfillment = current_hours / needed_hours
         delta_hours = (needed_hours * percent_days) - current_hours
 

@@ -55,23 +55,40 @@ class HamsterReport:
         days = defaultdict(datetime.timedelta)
         for f in facts:
             days[f.start_time.date()] += f.duration
-        total = sum([d.total_seconds() for d in days.values()])/3600
+        total = sum([d.total_seconds() for d in days.values()]) / 3600
         days = sorted(days.items(), key=operator.itemgetter(0))
         return days, total
 
     def get_durations_by_month(self, facts):
         months = defaultdict(datetime.timedelta)
         for f in facts:
-            months[f.start_time.date().strftime("%B")] += f.duration
-        total = sum([d.total_seconds() for d in months.values()])/3600
-        months = sorted(months.items(), key=lambda x: strptime(x[0], "%B"))
+            months[f.start_time.date().replace(day=1)] += f.duration
+        total = sum([d.total_seconds() for d in months.values()]) / 3600
+        months = sorted(months.items())
         return months, total
 
     def make_monthly_report(self):
         total_duration = datetime.timedelta()
-        months, total_hours = self.get_durations_by_month(self.facts)
+        duration_per_month, total_hours = self.get_durations_by_month(self.facts)
         title = 'Total hours in {}: {:.2f}'.format(self.year, total_hours)
-        self.make_bar_chart(months, title)
+        duration_per_month = self.add_fullfilment_info_to_titles(duration_per_month)
+        self.make_bar_chart(duration_per_month, title)
+
+    def add_fullfilment_info_to_titles(self, duration_per_month):
+        """
+        Adds how many hours were worked less/more than expected by number of
+        workdays.
+        """
+        from progress import Utils
+
+        def delta_needed_and_worked_hours(year, month, worked_duration):
+            needed_hours = Utils.calculate_needed_hours(year, month)
+            needed_hours = datetime.timedelta(hours=needed_hours)
+            return (worked_duration - needed_hours).total_seconds() / 3600
+
+        return [("{} ({:+.1f} h)".format(
+            m.strftime("%B"), delta_needed_and_worked_hours(m.year, m.month, d)),
+            d) for m, d in duration_per_month]
 
     def make_daily_report(self):
         total_duration = datetime.timedelta()

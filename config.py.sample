@@ -1,12 +1,20 @@
+import os
 import textwrap
 
-HAMSTER_DB = "sqlite:////home/foo/.local/share/hamster-applet/hamster.db"
-BILL_TEMPLATE = "./template/index.html"
-TIMEDELTA_DUE_DATE = 14  # amount of days from today until bill due
-LOCALE = ""  # e.g. de_DE.utf8 or leave empty for system default
-SAVE_HTML = False  # set to True to keep html format of bill in temp file
+import holidays
+
+
+base_dir = os.path.dirname(__file__)
+# HAMSTER_DB = "sqlite:////home/foo/.local/share/hamster-applet/hamster.db"
+HAMSTER_DB = "sqlite:////home/foo/safe/local/hamster.db"
+BILL_TEMPLATE = os.path.join(base_dir, "./template/index_de.html")
 ACTIVITY_ROW_TEMPLATE = "<tr><td>$start</td><td>$end</td><td>$duration</td><td>$description</td></tr>"
 BAR_CHART_ROW_TEMPLATE = '<dd style="width: ${width}%;">$label</dd>'
+TIMEDELTA_DUE_DATE = 14
+LOCALE = "de_DE.utf8"  # leave empty for system default
+HOLIDAYS = holidays.Germany(prov="BY")
+WORKDAY_HOURS = 8  # hours considered a full work day
+SAVE_HTML = True
 
 CUSTOMER = {
     "__common__": {  # common attributes for all customer

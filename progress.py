@@ -56,7 +56,7 @@ class HamsterProgress:
             percent_workdays=percent_workdays,
             needed_hours=needed_hours,
             percent_fulfillment=percent_fulfillment,
-            delta_hours=delta_hours,
+            delta_hours=abs(delta_hours),
             behind_ahead="behind" if delta_hours > 0 else "ahead of"
         )
 

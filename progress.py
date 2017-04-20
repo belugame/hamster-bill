@@ -65,8 +65,8 @@ class HamsterProgress:
         -----------------------------------------------------
         {left_days:4} out of {total_days:3} days left           ({percent_days:.1%} passed)
         {left_workdays:4} out of {total_workdays:3} workdays left       ({percent_workdays:.1%} passed)
-        {current_hours:3.1f} out of {needed_hours:3} needed hours worked ({percent_fulfillment:.1%} fulfilled)
-        {delta_hours:3.1f} hours {behind_ahead} schedule.
+        {current_hours:4.1f} out of {needed_hours:3} needed hours worked ({percent_fulfillment:.1%} fulfilled)
+        {delta_hours:4.1f} hours {behind_ahead} schedule.
         """.format(**data)
 
 

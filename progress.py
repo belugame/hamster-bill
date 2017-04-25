@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from calendar import Calendar
-from datetime import date
+from datetime import date, datetime, timedelta
 import argparse
 
 from report import HamsterReport
@@ -26,6 +26,8 @@ class Utils:
 
 class HamsterProgress:
 
+    cutoff_hour = 18  # after this hour the day is considered finished
+
     def __init__(self, year, month, client):
         self.client = client
         self.month = month
@@ -35,9 +37,10 @@ class HamsterProgress:
     def __repr__(self):
         days, workdays = Utils.get_days(self.year, self.month)
         today = date.today()
+        cutoff_day = today if datetime.now().hour < self.cutoff_hour else today + timedelta(days=1)
         total_workdays = len(workdays)
-        left_days = len(days[days.index(today):])
-        left_workdays = len(workdays[workdays.index(next(w for w in workdays if w >= today)):])
+        left_days = len(days[days.index(cutoff_day):])
+        left_workdays = len(workdays[workdays.index(next(w for w in workdays if w >= cutoff_day)):])
         percent_days = 1 - (left_days / len(days))
         percent_workdays = 1 - (left_workdays / total_workdays)
         current_hours = self.report.get_durations_by_day(self.report.facts)[1]

@@ -47,6 +47,9 @@ class HamsterProgress:
         needed_hours = Utils.calculate_needed_hours(self.year, self.month)
         percent_fulfillment = current_hours / needed_hours
         delta_hours = (needed_hours * percent_days) - current_hours
+        needed_hours_left = needed_hours - current_hours
+        needed_hours_per_day_left = needed_hours_left / left_days
+        needed_hours_per_workday_left = needed_hours_left / left_workdays
 
         data = dict(
             month=today.strftime("%B %Y"),
@@ -60,7 +63,10 @@ class HamsterProgress:
             needed_hours=needed_hours,
             percent_fulfillment=percent_fulfillment,
             delta_hours=abs(delta_hours),
-            behind_ahead="behind" if delta_hours > 0 else "ahead of"
+            behind_ahead="behind" if delta_hours > 0 else "ahead of",
+            needed_hours_left=needed_hours_left,
+            needed_hours_per_day_left=needed_hours_per_day_left,
+            needed_hours_per_workday_left=needed_hours_per_workday_left
         )
 
         return """
@@ -69,7 +75,9 @@ class HamsterProgress:
         {left_days:4} out of {total_days:3} days left           ({percent_days:.1%} passed)
         {left_workdays:4} out of {total_workdays:3} workdays left       ({percent_workdays:.1%} passed)
         {current_hours:4.1f} out of {needed_hours:3} needed hours worked ({percent_fulfillment:.1%} fulfilled)
-        {delta_hours:4.1f} hours {behind_ahead} schedule.
+        {delta_hours:4.1f} hours {behind_ahead} schedule ({needed_hours_left:4.1f} left)
+        {needed_hours_per_day_left:4.1f} hours/day left.
+        {needed_hours_per_workday_left:4.1f} hours/workday left.
         """.format(**data)
 
 

@@ -46,10 +46,17 @@ class HamsterProgress:
         except StopIteration:
             return None
 
+    def get_cutoff_day(self):
+        t = date.today()
+        if t == self.days[-1] or datetime.now().hour < self.cutoff_hour:
+            return t
+        return today + timedelta(days=1)
+
     def __repr__(self):
         self.days, self.workdays = Utils.get_days(self.year, self.month)
         today = date.today()
-        cutoff_day = today if datetime.now().hour < self.cutoff_hour else today + timedelta(days=1)
+        cutoff_day = self.get_cutoff_day()
+        print(cutoff_day)
         next_workday = self.next_workday(cutoff_day)
 
         if next_workday:
@@ -65,7 +72,7 @@ class HamsterProgress:
         current_hours = self.report.get_durations_by_day(self.report.facts)[1]
         needed_hours = Utils.calculate_needed_hours(self.year, self.month)
         percent_fulfillment = current_hours / needed_hours
-        delta_hours = (needed_hours * percent_days) - current_hours
+        delta_hours = ((total_workdays-left_workdays) * config.WORKDAY_HOURS) - current_hours
         needed_hours_left = needed_hours - current_hours
         needed_hours_per_day_left = needed_hours_left / left_days
         needed_hours_per_workday_left = needed_hours_left / left_workdays if left_workdays else 0

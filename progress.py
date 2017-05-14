@@ -27,8 +27,6 @@ class Utils:
         return len(workdays) * config.WORKDAY_HOURS
 
 
-
-
 class HamsterProgress:
 
     cutoff_hour = 18  # after this hour the day is considered finished
@@ -39,29 +37,40 @@ class HamsterProgress:
         self.year = year
         self.report = HamsterReport(year, month, client)
 
-    def next_workday(self, cutoff_day):
+    def next_workday(self, day):
+        return self.find_workday(day, reverse=False)
+
+    def previous_workday(self, day):
+        return self.find_workday(day, reverse=True)
+
+    def find_workday(self, day, reverse=False):
+        days = self.days.copy()
+        if reverse:
+            days.reverse()
         try:
-            foo = next(d for d in self.days[self.days.index(cutoff_day):] if Utils.is_workday(d))
+            foo = next(d for d in days[days.index(day):] if Utils.is_workday(d))
             return foo
         except StopIteration:
             return None
 
     def get_cutoff_day(self):
         t = date.today()
-        if t == self.days[-1] or datetime.now().hour < self.cutoff_hour:
+        tmr = today + timedelta(days=1)
+        if not Utils.is_workday(t) or not Utils.is_workday(tmr):
+            return self.previous_workday(t)
+        elif t == self.days[-1] or datetime.now().hour < self.cutoff_hour:
             return t
-        return today + timedelta(days=1)
+        return self.next_workday(t)
 
     def __repr__(self):
         self.days, self.workdays = Utils.get_days(self.year, self.month)
         today = date.today()
         cutoff_day = self.get_cutoff_day()
-        print(cutoff_day)
-        next_workday = self.next_workday(cutoff_day)
 
-        if next_workday:
-            left_workdays = len(self.workdays[self.workdays.index(next_workday):])
-        else:
+        try:
+            left_workdays = len(self.workdays[self.workdays.index(cutoff_day):])
+        except:
+            raise
             left_workdays = 0
 
         total_workdays = len(self.workdays)

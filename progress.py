@@ -48,7 +48,7 @@ class HamsterProgress:
         if reverse:
             days.reverse()
         try:
-            foo = next(d for d in days[days.index(day):] if Utils.is_workday(d))
+            foo = next(d for d in days[days.index(day)+1:] if Utils.is_workday(d))
             return foo
         except StopIteration:
             return None

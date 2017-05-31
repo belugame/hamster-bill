@@ -47,12 +47,7 @@ class HamsterProgress:
         days = self.days.copy()
         if reverse:
             days.reverse()
-        try:
-            foo = next(d for d in days[days.index(day)+1:] if Utils.is_workday(d))
-            return foo
-        except StopIteration:
-            print("foo")
-            return None
+            return next(d for d in days[days.index(day)+1:] if Utils.is_workday(d))
 
     def get_cutoff_day(self):
         t = date.today()
@@ -60,7 +55,6 @@ class HamsterProgress:
         if not Utils.is_workday(t) or not Utils.is_workday(tmr):
             return self.previous_workday(t)
         elif t == self.days[-1]:
-            print ("asdf")
             return t
         return self.next_workday(t)
 

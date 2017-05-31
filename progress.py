@@ -51,6 +51,7 @@ class HamsterProgress:
             foo = next(d for d in days[days.index(day)+1:] if Utils.is_workday(d))
             return foo
         except StopIteration:
+            print("foo")
             return None
 
     def get_cutoff_day(self):
@@ -58,7 +59,8 @@ class HamsterProgress:
         tmr = today + timedelta(days=1)
         if not Utils.is_workday(t) or not Utils.is_workday(tmr):
             return self.previous_workday(t)
-        elif t == self.days[-1] or datetime.now().hour < self.cutoff_hour:
+        elif t == self.days[-1]:
+            print ("asdf")
             return t
         return self.next_workday(t)
 
@@ -66,12 +68,8 @@ class HamsterProgress:
         self.days, self.workdays = Utils.get_days(self.year, self.month)
         today = date.today()
         cutoff_day = self.get_cutoff_day()
-
-        try:
-            left_workdays = len(self.workdays[self.workdays.index(cutoff_day):])
-        except:
-            raise
-            left_workdays = 0
+        delta = 0 if datetime.now().hour < self.cutoff_hour else 1
+        left_workdays = len(self.workdays[self.workdays.index(cutoff_day)+delta:])
 
         total_workdays = len(self.workdays)
         left_days = len(self.days[self.days.index(cutoff_day):])

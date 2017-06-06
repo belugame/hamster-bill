@@ -47,7 +47,7 @@ class HamsterProgress:
         days = self.days.copy()
         if reverse:
             days.reverse()
-            return next(d for d in days[days.index(day)+1:] if Utils.is_workday(d))
+        return next(d for d in days[days.index(day)+1:] if Utils.is_workday(d))
 
     def get_cutoff_day(self):
         t = date.today()

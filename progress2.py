@@ -3,6 +3,7 @@ from calendar import Calendar
 from datetime import date, datetime, timedelta
 import argparse
 
+from ascii_graph import Pyasciigraph
 from report import HamsterReport
 import config
 
@@ -53,7 +54,10 @@ class HamsterProgress:
         else:
             percentage_of_workhours_done = current_hours / total_needed_hours
 
-        from ascii_graph import Pyasciigraph
+        performance = (percentage_of_workhours_done - percentage_of_month_gone) * 100 * (total_needed_hours/100)
+        performance = "{:.1f} h {}".format(abs(performance),
+                                           "ahead" if performance >= 0 else "behind")
+
         graph = Pyasciigraph(float_format='{0:.1%}', graphsymbol='֍', line_length=20)
         graph = "\n        ".join(graph.graph(None, [("Passed", percentage_of_month_gone),
                                                      ("Fulfilled", percentage_of_workhours_done)]))
@@ -66,7 +70,8 @@ class HamsterProgress:
             needed_hours_left=total_needed_hours - current_hours,
             percentage_of_workhours_done=percentage_of_workhours_done,
             percentage_of_month_gone=percentage_of_month_gone,
-            graph=graph
+            graph=graph,
+            performance=performance
         )
 
         return """
@@ -74,6 +79,7 @@ class HamsterProgress:
         -----------------------------------------------------
         Workdays: {total_workdays:3}
         Hours: {current_hours:.1f} / {total_needed_hours} ({needed_hours_left:.1f} left)
+        Status: {performance}
 
         {graph}
         """.format(**data)

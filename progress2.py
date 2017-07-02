@@ -53,6 +53,11 @@ class HamsterProgress:
         else:
             percentage_of_workhours_done = current_hours / total_needed_hours
 
+        from ascii_graph import Pyasciigraph
+        graph = Pyasciigraph(float_format='{0:.1%}', graphsymbol='֍', line_length=20)
+        graph = "\n        ".join(graph.graph(None, [("Passed", percentage_of_month_gone),
+                                                     ("Fulfilled", percentage_of_workhours_done)]))
+
         data = dict(
             month=today.strftime("%B %Y"),
             total_workdays=total_workdays,
@@ -60,8 +65,8 @@ class HamsterProgress:
             total_needed_hours=total_needed_hours,
             needed_hours_left=total_needed_hours - current_hours,
             percentage_of_workhours_done=percentage_of_workhours_done,
-            percentage_of_month_gone=percentage_of_month_gone
-
+            percentage_of_month_gone=percentage_of_month_gone,
+            graph=graph
         )
 
         return """
@@ -70,9 +75,7 @@ class HamsterProgress:
         Workdays: {total_workdays:3}
         Hours: {current_hours:.1f} / {total_needed_hours} ({needed_hours_left:.1f} left)
 
-        Hours done: {percentage_of_workhours_done:.1%}
-        Month passed: {percentage_of_month_gone:.1%}
-
+        {graph}
         """.format(**data)
 
 

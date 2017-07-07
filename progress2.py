@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from calendar import Calendar
 from datetime import date, datetime, timedelta
 import argparse
@@ -54,9 +54,10 @@ class HamsterProgress:
         else:
             percentage_of_workhours_done = current_hours / total_needed_hours
 
-        performance = (percentage_of_workhours_done - percentage_of_month_gone) * 100 * (total_needed_hours/100)
-        performance = "{:.1f} h {}".format(abs(performance),
-                                           "ahead" if performance >= 0 else "behind")
+        status_relative = (percentage_of_workhours_done - percentage_of_month_gone)
+        status_absolute = status_relative * 100 * (total_needed_hours/100)
+        status_absolute = "{:.1f} h {}".format(abs(status_absolute),
+                                           "ahead" if status_absolute >= 0 else "behind")
 
         graph = Pyasciigraph(float_format='{0:.1%}', graphsymbol='֍', line_length=20)
         graph = "\n        ".join(graph.graph(None, [("Passed", percentage_of_month_gone),
@@ -71,7 +72,8 @@ class HamsterProgress:
             percentage_of_workhours_done=percentage_of_workhours_done,
             percentage_of_month_gone=percentage_of_month_gone,
             graph=graph,
-            performance=performance
+            status_absolute=status_absolute,
+            status_relative=status_relative,
         )
 
         return """
@@ -79,7 +81,7 @@ class HamsterProgress:
         -----------------------------------------------------
         Workdays: {total_workdays:3}
         Hours: {current_hours:.1f} / {total_needed_hours} ({needed_hours_left:.1f} left)
-        Status: {performance}
+        Status: {status_absolute} | {status_relative:+.1%}
 
         {graph}
         """.format(**data)

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 
 from models import Fact
@@ -20,8 +20,16 @@ class HamsterDBReader:
         self.session.close()
 
     def get_facts(self, start, end, tag=None):
+        self.assert_max_one_not_ended_record()
         facts = self.session.query(Fact).filter(Fact.start_time >= start,
-                                                Fact.end_time <= end)
+                                                or_(Fact.end_time == None,
+                                                    Fact.end_time <= end))
+
         if tag:
             facts = facts.filter(Fact.tags.any(name=tag))
         return facts.order_by(Fact.start_time)
+
+    def assert_max_one_not_ended_record(self):
+        facts = self.session.query(Fact).filter(Fact.end_time == None)
+        assert facts.count() < 2, "More than one record has no end time!"
+

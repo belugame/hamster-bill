@@ -1,4 +1,6 @@
 # coding: utf-8
+from datetime import datetime
+
 from sqlalchemy import Boolean, Column, DateTime, Integer, LargeBinary, Table, Text, text, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import NullType
@@ -90,8 +92,19 @@ class Fact(Base):
 
     tags = relationship("Tag", secondary=t_fact_tags, back_populates="facts")
 
+    def __repr__(self):
+        return "<Fact: {}: {}-{}>".format(self.activity.name,
+                                          self.start_time, self.end_time)
+
     @property
     def duration(self):
+        if not self.end_time:
+            # Only may happen for currently running record
+            self.end_time = datetime.now()
+            # Sanity check that this is the current record and not one in the
+            # past that was forgotten:
+            assert (self.end_time - self.start_time).seconds < 7*60*60, \
+                "Something wrong about {}?".format(self)
         return self.end_time - self.start_time
 
 

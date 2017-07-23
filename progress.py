@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from calendar import Calendar
 from datetime import date, datetime, timedelta
 import argparse
 
+from ascii_graph import Pyasciigraph
 from report import HamsterReport
 import config
 
@@ -29,7 +30,6 @@ class Utils:
 
 class HamsterProgress:
 
-    cutoff_hour = 18  # after this hour the day is considered finished
 
     def __init__(self, year, month, client):
         self.client = client
@@ -37,74 +37,53 @@ class HamsterProgress:
         self.year = year
         self.report = HamsterReport(year, month, client)
 
-    def next_workday(self, day):
-        return self.find_workday(day, reverse=False)
-
-    def previous_workday(self, day):
-        return self.find_workday(day, reverse=True)
-
-    def find_workday(self, day, reverse=False):
-        days = self.days.copy()
-        if reverse:
-            days.reverse()
-        return next(d for d in days[days.index(day)+1:] if Utils.is_workday(d))
-
-    def get_cutoff_day(self):
-        t = date.today()
-        tmr = today + timedelta(days=1)
-        if not Utils.is_workday(t) or not Utils.is_workday(tmr):
-            return self.previous_workday(t)
-        elif t == self.days[-1]:
-            return t
-        return self.next_workday(t)
 
     def __repr__(self):
         self.days, self.workdays = Utils.get_days(self.year, self.month)
         today = date.today()
-        cutoff_day = self.get_cutoff_day()
-        delta = 0 if datetime.now().hour < self.cutoff_hour else 1
-        left_workdays = len(self.workdays[self.workdays.index(cutoff_day)+delta:])
-
+        now = datetime.now()
+        start_of_month = datetime(self.year, self.month, 1, 0, 0, 0)
+        seconds_of_month_passed = (now - start_of_month).total_seconds()
+        total_seconds_of_month = len(self.days) * 24 * 60 * 60
+        percentage_of_month_gone = seconds_of_month_passed / total_seconds_of_month
         total_workdays = len(self.workdays)
-        left_days = len(self.days[self.days.index(cutoff_day):])
-
-        percent_days = 1 - (left_days / len(self.days))
-        percent_workdays = 1 - (left_workdays / total_workdays)
         current_hours = self.report.get_durations_by_day(self.report.facts)[1]
-        needed_hours = Utils.calculate_needed_hours(self.year, self.month)
-        percent_fulfillment = current_hours / needed_hours
-        delta_hours = ((total_workdays-left_workdays) * config.WORKDAY_HOURS) - current_hours
-        needed_hours_left = needed_hours - current_hours
-        needed_hours_per_day_left = needed_hours_left / left_days
-        needed_hours_per_workday_left = needed_hours_left / left_workdays if left_workdays else 0
+        total_needed_hours = Utils.calculate_needed_hours(self.year, self.month)
+        if current_hours == 0:
+            percentage_of_workhours_done = 0
+        else:
+            percentage_of_workhours_done = current_hours / total_needed_hours
+
+        status_relative = (percentage_of_workhours_done - percentage_of_month_gone)
+        status_absolute = status_relative * 100 * (total_needed_hours/100)
+        status_absolute = "{:.1f} h {}".format(abs(status_absolute),
+                                           "ahead" if status_absolute >= 0 else "behind")
+
+        graph = Pyasciigraph(float_format='{0:.1%}', graphsymbol='֍', line_length=20)
+        graph = "\n        ".join(graph.graph(None, [("Passed", percentage_of_month_gone),
+                                                     ("Fulfilled", percentage_of_workhours_done)]))
 
         data = dict(
             month=today.strftime("%B %Y"),
-            total_days=len(self.days),
             total_workdays=total_workdays,
-            left_days=left_days,
-            left_workdays=left_workdays,
             current_hours=current_hours,
-            percent_days=percent_days,
-            percent_workdays=percent_workdays,
-            needed_hours=needed_hours,
-            percent_fulfillment=percent_fulfillment,
-            delta_hours=abs(delta_hours),
-            behind_ahead="behind" if needed_hours_per_workday_left > config.WORKDAY_HOURS else "ahead of",
-            needed_hours_left=needed_hours_left,
-            needed_hours_per_day_left=needed_hours_per_day_left,
-            needed_hours_per_workday_left=needed_hours_per_workday_left
+            total_needed_hours=total_needed_hours,
+            needed_hours_left=total_needed_hours - current_hours,
+            percentage_of_workhours_done=percentage_of_workhours_done,
+            percentage_of_month_gone=percentage_of_month_gone,
+            graph=graph,
+            status_absolute=status_absolute,
+            status_relative=status_relative,
         )
 
         return """
         {month}:
         -----------------------------------------------------
-        {left_days:4} out of {total_days:3} days left           ({percent_days:.1%} passed)
-        {left_workdays:4} out of {total_workdays:3} workdays left       ({percent_workdays:.1%} passed)
-        {current_hours:4.1f} out of {needed_hours:3} needed hours worked ({percent_fulfillment:.1%} fulfilled)
-        {delta_hours:4.1f} hours {behind_ahead} schedule ({needed_hours_left:4.1f} left)
-        {needed_hours_per_day_left:4.1f} hours/day left.
-        {needed_hours_per_workday_left:4.1f} hours/workday left.
+        Workdays: {total_workdays:3}
+        Hours: {current_hours:.1f} / {total_needed_hours} ({needed_hours_left:.1f} left)
+        Status: {status_absolute} | {status_relative:+.1%}
+
+        {graph}
         """.format(**data)
 
 

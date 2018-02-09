@@ -91,9 +91,12 @@ class HamsterReport:
             d) for m, d in duration_per_month]
 
     def make_daily_report(self):
+        from progress import Utils
         total_duration = datetime.timedelta()
         days, total_hours = self.get_durations_by_day(self.facts)
-        title = 'Total hours in {}/{}: {:.2f}'.format(self.month, self.year, total_hours)
+        needed_daily = Utils.calculate_needed_hours_per_day(year, month)
+        title = 'Total hours in {}/{}: {:.2f}  Needed daily average: {:.2f}'.format(
+            self.month, self.year, total_hours, needed_daily)
         self.make_bar_chart(days, title)
 
     def make_bar_chart(self, data, title):

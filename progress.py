@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from calendar import Calendar
-from datetime import date, datetime, timedelta
+from calendar import Calendar, monthrange
+from datetime import date, datetime
 import argparse
 
 from ascii_graph import Pyasciigraph
@@ -27,9 +27,14 @@ class Utils:
         _, workdays = Utils.get_days(year, month)
         return len(workdays) * config.WORKDAY_HOURS
 
+    @classmethod
+    def calculate_needed_hours_per_day(cls, year, month):
+        needed_hours = cls.calculate_needed_hours(year, month)
+        num_days_in_month = monthrange(year, month)[1]
+        return needed_hours / num_days_in_month
+
 
 class HamsterProgress:
-
 
     def __init__(self, year, month, client):
         self.client = client
